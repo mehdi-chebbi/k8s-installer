@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-deployer-client
+  namespace: default
+  labels:
+    app: grpc-deployer-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-deployer-client
+  template:
+    metadata:
+      labels:
+        app: grpc-deployer-client
+    spec:
+      containers:
+      - name: grpc-deployer-client
+        image: localhost:5000/grpc-deployer-client:latest
+        imagePullPolicy: Always
+        command: ["sh", "-c"]
+        args:
+        - |
+          echo "Waiting for server to be ready..."
+          until nc -z grpc-deployer-service 50051; do
+            echo "Server not ready, waiting..."
+            sleep 2
+          done
+          echo "Server is ready! Starting client..."
+          ./client --deploy

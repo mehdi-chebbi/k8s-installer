@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package deploy;
+
+option go_package = "github.com/mehdino123/grpc-k8s-deployer/proto";
+
+// Deployment service definition
+service DeploymentService {
+  // Deploys an application to Kubernetes
+  rpc DeployApp(DeployRequest) returns (DeployResponse) {}
+  
+  // Gets the status of a deployment
+  rpc GetDeploymentStatus(StatusRequest) returns (StatusResponse) {}
+  
+  // Lists all deployments in a namespace
+  rpc ListDeployments(ListRequest) returns (ListResponse) {}
+}
+
+// Request message for deploying an application
+message DeployRequest {
+  string namespace = 1;
+  string image_name = 2;
+  string app_name = 3;
+  int32 replicas = 4;
+  map<string, string> labels = 5;
+  map<string, string> annotations = 6;
+  repeated ContainerPort ports = 7;
+  ServiceConfig service_config = 8;
+}
+
+// Container port configuration
+message ContainerPort {
+  string name = 1;
+  int32 container_port = 2;
+  string protocol = 3;
+}
+
+// Service configuration
+message ServiceConfig {
+  string service_type = 1;
+  repeated ServicePort ports = 2;
+}
+
+// Service port configuration
+message ServicePort {
+  string name = 1;
+  int32 port = 2;
+  int32 target_port = 3;
+  string protocol = 4;
+}
+
+// Response message for deployment
+message DeployResponse {
+  bool success = 1;
+  string message = 2;
+  string deployment_name = 3;
+  string service_name = 4;
+}
+
+// Request message for getting deployment status
+message StatusRequest {
+  string namespace = 1;
+  string deployment_name = 2;
+}
+
+// Response message for deployment status
+message StatusResponse {
+  bool success = 1;
+  string message = 2;
+  DeploymentInfo deployment_info = 3;
+}
+
+// Deployment information
+message DeploymentInfo {
+  string name = 1;
+  string namespace = 2;
+  int32 replicas = 3;
+  int32 ready_replicas = 4;
+  int32 available_replicas = 5;
+  repeated string conditions = 6;
+}
+
+// Request message for listing deployments
+message ListRequest {
+  string namespace = 1;
+  map<string, string> label_selector = 2;
+}
+
+// Response message for listing deployments
+message ListResponse {
+  bool success = 1;
+  string message = 2;
+  repeated DeploymentInfo deployments = 3;
+}

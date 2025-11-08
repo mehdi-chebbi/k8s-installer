@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-deployer-server
+  namespace: default
+  labels:
+    app: grpc-deployer-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-deployer-server
+  template:
+    metadata:
+      labels:
+        app: grpc-deployer-server
+    spec:
+      serviceAccountName: deployer-sa
+      containers:
+      - name: grpc-deployer-server
+        image: localhost:5000/grpc-deployer-server:latest
+        ports:
+        - containerPort: 50051
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-deployer-service
+  namespace: default
+spec:
+  selector:
+    app: grpc-deployer-server
+  ports:
+  - port: 50051
+    targetPort: 50051
+  type: ClusterIP

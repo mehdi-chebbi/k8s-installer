@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grpc-deployer-client
+  namespace: default
+  labels:
+    app: grpc-deployer-client
+spec:
+  template:
+    metadata:
+      labels:
+        app: grpc-deployer-client
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: grpc-deployer-client
+        image: localhost:5000/grpc-deployer-client:latest
+        imagePullPolicy: Always
+        command: ["sh", "-c"]
+        args:
+        - |
+          echo "Waiting for server to be ready..."
+          until nc -z grpc-deployer-service 50051; do
+            echo "Server not ready, waiting..."
+            sleep 2
+          done
+          echo "Server is ready! Starting client..."
+          ./client --deploy
